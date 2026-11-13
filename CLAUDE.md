@@ -14,7 +14,7 @@ npm run preview    # build for Cloudflare and run locally in workerd (:8787)
 npm run deploy     # build + deploy the Cloudflare Worker (needs Cloudflare auth)
 ```
 
-Run `npm run typecheck && npm test` before every commit. Pushing to `main` deploys automatically (`.github/workflows/deploy.yml`), so `main` must always build.
+Run `npm run typecheck && npm test` before every commit. Pushing to `main` deploys automatically (`.github/workflows/deploy.yml`), so `main` must always build. Every pull request from this repo uploads a preview version of the same Worker (`.github/workflows/preview.yml`, `wrangler versions upload --preview-alias pr-<n>`) at `https://pr-<n>-fieldwise.<account>.workers.dev` and comments the URL on the PR; it never takes production traffic.
 
 ## Stack
 
