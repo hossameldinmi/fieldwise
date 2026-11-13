@@ -44,8 +44,9 @@ jobs:
         run: |
           set -o pipefail
           npx opennextjs-cloudflare upload --preview-alias "$ALIAS" --tag "${SHA:0:12}" --message "PR #${ALIAS#pr-} @ ${SHA:0:7}" 2>&1 | tee upload.log
-          url=$(grep -oE 'Version Preview Alias URL: https://[^ ]+' upload.log | awk '{print $NF}' | tail -1)
-          version_url=$(grep -oE 'Version Preview URL: https://[^ ]+' upload.log | awk '{print $NF}' | tail -1)
+          # grep exits 1 when Cloudflare prints no preview URL (previews not enabled yet); that is not a failure.
+          url=$(grep -oE 'Version Preview Alias URL: https://[^ ]+' upload.log | awk '{print $NF}' | tail -1 || true)
+          version_url=$(grep -oE 'Version Preview URL: https://[^ ]+' upload.log | awk '{print $NF}' | tail -1 || true)
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "version_url=$version_url" >> "$GITHUB_OUTPUT"
           if [ -z "$url" ]; then
