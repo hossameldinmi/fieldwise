@@ -11,11 +11,8 @@ export function AppHeader({ lang, step, canAnalyze, onStep, onLang }: Props) {
     <header className="no-print border-b border-line bg-white">
       <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-8">
         <div className="flex items-center gap-3">
-          <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
-            <rect width="36" height="36" rx="8" fill="#1D6B47" />
-            <path d="M8 26h20M8 20h20M8 14h20" stroke="#E3EFE7" strokeWidth="2" strokeLinecap="round" />
-            <circle cx="24" cy="10" r="3" fill="#F2B544" />
-          </svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo-mark.png" width={44} height={44} alt="" aria-hidden="true" className="h-11 w-11 shrink-0" />
           <div>
             <div className="text-lg font-bold">{t(lang, 'appName')}</div>
             <div className="text-xs text-muted">{t(lang, 'appSub')}</div>
