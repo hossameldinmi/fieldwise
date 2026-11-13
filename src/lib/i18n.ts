@@ -1,5 +1,6 @@
 import type { CropDataset, Lang, Note, Tier } from './types';
 import { GOVERNORATES } from './geo/regions';
+import { UI_AR, UI_EN } from './i18n-ui';
 
 type Dict = Record<string, string>;
 
@@ -170,7 +171,7 @@ const ar: Dict = {
   'diag.orobanche': 'تاريخ بذور الهالوك في الحقل قبل زراعة الفول.',
 };
 
-export const DICTS: Record<Lang, Dict> = { en, ar };
+export const DICTS: Record<Lang, Dict> = { en: { ...en, ...UI_EN }, ar: { ...ar, ...UI_AR } };
 
 export function t(lang: Lang, key: string, params?: Record<string, string | number>): string {
   let s = DICTS[lang][key] ?? DICTS.en[key] ?? key;

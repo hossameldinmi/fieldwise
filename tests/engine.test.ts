@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_DATASET } from '../src/lib/crops/default';
 import { evaluateAll } from '../src/lib/engine/evaluate';
 import { buildSchedule } from '../src/lib/engine/calendar';
-import { STRATEGIES } from '../src/lib/engine/strategies';
+import { STRATEGIES, farmStrategies } from '../src/lib/engine/strategies';
 import { cropSoilScore, hostGaps } from '../src/lib/engine/dimensions';
 import { soilAmendments } from '../src/lib/engine/amendments';
 import { verifyLocation } from '../src/lib/geo/verify';
@@ -86,5 +86,24 @@ describe('geo verification', () => {
     const v = verifyLocation(farm({ governorate: 'كفر الشيخ' }), { countryCode: 'eg', country: 'Egypt', state: 'Kafr El-Sheikh Governorate' });
     expect(v.method).toBe('reverse_geocode');
     expect(v.overridden).toBe(false);
+  });
+});
+
+describe('farm strategies', () => {
+  it('makes the current rotation option A and keeps B and C', () => {
+    const s = farmStrategies({ winter: 'berseem', summer: 'rice' }, ['wheat', 'maize', 'faba_bean', 'sunflower']);
+    expect(s.map((x) => x.id)).toEqual(['A', 'B', 'C', 'D']);
+    expect(s[0].slots.map((x) => x.cropId)).toEqual(['berseem', 'rice', 'berseem', 'rice']);
+    expect(s[3].years).toBe(2);
+  });
+  it('omits D when the custom sequence is not whole years', () => {
+    expect(farmStrategies({ winter: 'wheat', summer: 'maize' }, ['wheat', 'maize', 'wheat']).map((x) => x.id)).toEqual(['A', 'B', 'C']);
+  });
+  it('scores all four options', () => {
+    const s = farmStrategies({ winter: 'wheat', summer: 'maize' }, ['faba_bean', 'maize', 'wheat', 'soybean', 'barley', 'sunflower', 'wheat', 'maize']);
+    const rep = evaluateAll(farm(), deltaClimate, DEFAULT_DATASET, false, s);
+    expect(rep.results).toHaveLength(4);
+    expect(rep.results.find((r) => r.id === 'D')!.strategy.years).toBe(4);
+    for (const r of rep.results) expect(r.total).toBeGreaterThan(0);
   });
 });

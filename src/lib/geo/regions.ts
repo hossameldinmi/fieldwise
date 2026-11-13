@@ -14,6 +14,13 @@ export interface Governorate {
   salinityRisk: boolean;
 }
 
+/** Display name for a stored governorate string (stored in English; matched by name or alias). */
+export function governorateLabel(stored: string, lang: 'en' | 'ar'): string {
+  const s = stored.trim().toLowerCase();
+  const g = GOVERNORATES.find((x) => x.name.en.toLowerCase() === s || x.name.ar === stored.trim() || x.aliases.includes(s));
+  return g ? g.name[lang] : stored;
+}
+
 export const EGYPT_BBOX: [number, number, number, number] = [22.0, 31.7, 24.7, 36.9];
 
 export const GOVERNORATES: Governorate[] = [

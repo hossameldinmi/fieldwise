@@ -8,11 +8,10 @@ import { buildCropWorkbook, parseCropWorkbook } from '@/lib/crops/xlsx';
 export function DatasetPanel({ dataset, lang, onLoad }: { dataset: CropDataset; lang: Lang; onLoad: (d: CropDataset) => void }) {
   const [error, setError] = useState<string | null>(null);
   return (
-    <div className="space-y-2 text-sm">
-      <p className="font-medium text-siltSoft">{t(lang, 'dataset')}</p>
-      <p className="text-siltSoft">{t(lang, 'datasetLoaded', { n: dataset.crops.length, p: dataset.pathogens.length, v: dataset.version })}</p>
-      <div className="flex flex-wrap gap-2">
-        <label className="cursor-pointer rounded-md border border-line bg-white px-3 py-1.5 hover:border-berseem focus-within:ring-2 focus-within:ring-berseem">
+    <div className="max-w-[420px] space-y-2 text-end text-sm">
+      <div className="flex flex-wrap justify-end gap-2">
+        <label className="fw-btn cursor-pointer focus-within:outline focus-within:outline-2 focus-within:outline-green">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M4 21h16" /></svg>
           {t(lang, 'datasetLoad')}
           <input type="file" accept=".xlsx" className="sr-only" onChange={async (e) => {
             const file = e.target.files?.[0];
@@ -21,12 +20,12 @@ export function DatasetPanel({ dataset, lang, onLoad }: { dataset: CropDataset; 
             catch (err) { setError(err instanceof Error ? err.message : String(err)); }
           }} />
         </label>
-        <button type="button" className="rounded-md border border-line bg-white px-3 py-1.5 hover:border-berseem focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-berseem"
-          onClick={() => XLSX.writeFile(buildCropWorkbook(dataset), 'crops_database.xlsx')}>
+        <button type="button" className="fw-btn" onClick={() => XLSX.writeFile(buildCropWorkbook(dataset), 'crops_database.xlsx')}>
           {t(lang, 'datasetDownload')}
         </button>
       </div>
-      {error && <p role="alert" className="text-blight">{error}</p>}
+      <p className="text-xs text-muted">{t(lang, 'datasetLoaded', { n: dataset.crops.length, p: dataset.pathogens.length, v: dataset.version })}</p>
+      {error && <p role="alert" className="text-red">{error}</p>}
     </div>
   );
 }

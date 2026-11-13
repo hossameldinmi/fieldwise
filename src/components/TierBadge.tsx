@@ -3,11 +3,11 @@ import type { Lang, Tier } from '@/lib/types';
 import { t } from '@/lib/i18n';
 
 const TIER_STYLE: Record<Tier, string> = {
-  1: 'bg-canal text-white',
-  2: 'bg-[#DCE8EE] text-canal',
-  3: 'bg-[#E1ECDF] text-berseem',
-  4: 'bg-[#F3EBD3] text-[#6F5612]',
-  5: 'bg-white text-blight ring-1 ring-blight',
+  1: 'bg-blue-deep text-white',
+  2: 'bg-green-tint text-green-dark',
+  3: 'bg-plum-band text-plum',
+  4: 'bg-amber-tint text-amber',
+  5: 'bg-white text-red ring-1 ring-red',
 };
 
 export function TierBadge({ tier, lang }: { tier: Tier; lang: Lang }) {

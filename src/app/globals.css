@@ -3,22 +3,41 @@
 @tailwind utilities;
 
 :root { color-scheme: light; }
-html { background: #F5F7F2; color: #33291F; }
-body { font-feature-settings: 'tnum' 0; -webkit-font-smoothing: antialiased; }
-:focus-visible { outline: 2px solid #2E6B3C; outline-offset: 2px; }
+html { background: #F5F6F1; color: #15201B; }
+html[lang='ar'] body { font-family: 'IBM Plex Sans Arabic', 'IBM Plex Sans', system-ui, sans-serif; }
+/* Plex Mono has no Arabic glyphs and letter-spacing breaks Arabic joining, so mono labels fall back to Plex Sans Arabic. */
+html[lang='ar'] .font-mono, html[lang='ar'] .fw-eye { font-family: 'IBM Plex Mono', 'IBM Plex Sans Arabic', monospace; letter-spacing: 0; }
+body { -webkit-font-smoothing: antialiased; }
+:focus-visible { outline: 2px solid #1D6B47; outline-offset: 2px; }
 .leaflet-container { font: inherit; }
+
+@layer components {
+  .fw-wrap { @apply mx-auto box-border max-w-[1280px] px-4 py-6 sm:px-8 sm:py-8; }
+  .fw-card { @apply box-border rounded-[14px] border border-line bg-white px-[22px] py-5; }
+  .fw-h1 { @apply mt-1.5 text-[26px] font-semibold leading-tight tracking-[-0.01em] sm:text-[32px]; }
+  .fw-h2 { @apply m-0 text-[17px] font-semibold; }
+  .fw-eye { @apply font-mono text-xs uppercase tracking-[0.06em] text-green; }
+  .fw-lead { @apply mt-2 max-w-[760px] text-[15px] leading-relaxed text-muted; }
+  .fw-lbl { @apply mb-1.5 block text-[13px] font-medium text-sub; }
+  .fw-in { @apply box-border h-11 w-full rounded-lg border border-field bg-white px-3 text-[15px] text-ink; }
+  .fw-btn { @apply inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-[10px] border border-field bg-white px-4 text-sm text-ink disabled:cursor-not-allowed disabled:opacity-60; }
+  .fw-btn-sm { @apply min-h-[40px] rounded-lg px-3 text-[13px]; }
+  .fw-pri { @apply border-green bg-green font-semibold text-white hover:bg-green-dark; }
+  .fw-seg { @apply flex overflow-hidden rounded-lg border border-field bg-white; }
+  .fw-seg-btn { @apply min-h-[40px] cursor-pointer border-0 bg-white px-3.5 text-[13px] text-ink; }
+  .fw-seg-btn[aria-pressed='true'] { @apply bg-ink font-semibold text-white; }
+  .fw-chip { @apply rounded-full border border-line bg-white px-2.5 py-1.5 text-xs text-sub; }
+  .fw-kpi { @apply mt-1.5 text-[28px] font-semibold; }
+  .fw-foot { @apply mt-7 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-5; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-@page { size: A4 landscape; margin: 12mm; }
+@page { size: A4; margin: 12mm; }
 @media print {
   html, body { background: #fff; }
   .no-print { display: none !important; }
-  .print-full { width: 100% !important; max-width: none !important; grid-column: 1 / -1 !important; }
-  details > summary { list-style: none; }
-  table { page-break-inside: avoid; }
-  th, td { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
-  .recharts-legend-wrapper { position: relative !important; }
+  .fw-card { break-inside: avoid; }
 }
