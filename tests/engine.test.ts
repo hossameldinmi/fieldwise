@@ -56,11 +56,15 @@ describe('rotation logic', () => {
   it('every turnaround is at least 14 days', () => {
     for (const s of STRATEGIES) for (const p of buildSchedule(s, crops)) expect(p.gapBefore).toBeGreaterThanOrEqual(14);
   });
-  it('flags take-all in continuous wheat (Option A) but not Option B', () => {
+  it('flags take-all in continuous wheat (Option A) with a shorter break than Option B', () => {
     const rep = evaluateAll(farm(), deltaClimate, DEFAULT_DATASET);
-    const pestNotes = (id: string) => rep.results.find((r) => r.id === id)!.dims.find((d) => d.id === 'pest')!.notes;
-    expect(pestNotes('A').some((n) => n.key === 'pest.violation' && n.params?.pathogen === 'take_all')).toBe(true);
-    expect(pestNotes('B').some((n) => n.key === 'pest.violation' && n.params?.pathogen === 'take_all')).toBe(false);
+    const pestDim = (id: string) => rep.results.find((r) => r.id === id)!.dims.find((d) => d.id === 'pest')!;
+    const takeAllGap = (id: string) => Math.min(...pestDim(id).notes
+      .filter((n) => n.key.startsWith('pest.') && n.params?.pathogen === 'take_all' && n.params?.gap !== undefined)
+      .map((n) => Number(n.params!.gap)));
+    expect(pestDim('A').notes.some((n) => n.key === 'pest.violation' && n.params?.pathogen === 'take_all')).toBe(true);
+    expect(takeAllGap('A')).toBe(1);
+    expect(takeAllGap('B')).toBe(3);
   });
   it('Option A has zero BNF credit; B has positive', () => {
     const rep = evaluateAll(farm(), deltaClimate, DEFAULT_DATASET);

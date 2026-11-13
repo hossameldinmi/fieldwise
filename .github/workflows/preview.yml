@@ -1,0 +1,72 @@
+name: Preview
+
+# Uploads each pull request as a preview version of the Cloudflare Worker "fieldwise",
+# reachable at https://pr-<number>-fieldwise.<account>.workers.dev. Production traffic is untouched:
+# `versions upload` creates a version without deploying it (only deploy.yml on main deploys).
+# Needs repository secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID, and preview URLs enabled
+# on the Worker ("preview_urls": true in wrangler.jsonc, applied by the next production deploy).
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    # Fork PRs get no secrets; skip them instead of failing.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+    environment:
+      name: preview-pr-${{ github.event.pull_request.number }}
+      url: ${{ steps.upload.outputs.url }}
+    env:
+      ALIAS: pr-${{ github.event.pull_request.number }}
+      SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx opennextjs-cloudflare build
+      - id: upload
+        name: Upload preview version
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -o pipefail
+          npx opennextjs-cloudflare upload --preview-alias "$ALIAS" --tag "${SHA:0:12}" --message "PR #${ALIAS#pr-} @ ${SHA:0:7}" 2>&1 | tee upload.log
+          # grep exits 1 when Cloudflare prints no preview URL (previews not enabled yet); that is not a failure.
+          url=$(grep -oE 'Version Preview Alias URL: https://[^ ]+' upload.log | awk '{print $NF}' | tail -1 || true)
+          version_url=$(grep -oE 'Version Preview URL: https://[^ ]+' upload.log | awk '{print $NF}' | tail -1 || true)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "version_url=$version_url" >> "$GITHUB_OUTPUT"
+          if [ -z "$url" ]; then
+            echo "::warning::Uploaded, but Cloudflare returned no preview URL. Enable preview URLs on the Worker (deploy main once with preview_urls: true, or Workers > fieldwise > Settings > Domains & Routes)."
+          fi
+      - name: Comment preview URL on the PR
+        uses: actions/github-script@v7
+        env:
+          URL: ${{ steps.upload.outputs.url }}
+          VERSION_URL: ${{ steps.upload.outputs.version_url }}
+        with:
+          script: |
+            const marker = '<!-- fieldwise-preview -->';
+            const { URL, VERSION_URL, SHA } = process.env;
+            const body = URL
+              ? `${marker}\n**Cloudflare preview:** ${URL}\n\nCommit \`${SHA.slice(0, 7)}\` · this exact version: ${VERSION_URL}\n\nPreview versions share the production Worker's bindings and variables, and are public unless Cloudflare Access protects them.`
+              : `${marker}\n**Cloudflare preview:** version for \`${SHA.slice(0, 7)}\` uploaded, but no preview URL is available yet. Preview URLs turn on after the next production deploy of \`wrangler.jsonc\` with \`"preview_urls": true\`.`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+            const mine = comments.find((c) => c.user.type === 'Bot' && c.body.includes(marker));
+            if (mine) await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body });
+            else await github.rest.issues.createComment({ owner, repo, issue_number, body });

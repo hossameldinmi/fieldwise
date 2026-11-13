@@ -14,7 +14,7 @@ npm run preview    # build for Cloudflare and run locally in workerd (:8787)
 npm run deploy     # build + deploy the Cloudflare Worker (needs Cloudflare auth)
 ```
 
-Run `npm run typecheck && npm test` before every commit. Pushing to `main` deploys automatically (`.github/workflows/deploy.yml`), so `main` must always build.
+Run `npm run typecheck && npm test` before every commit. Pushing to `main` deploys automatically (`.github/workflows/deploy.yml`), so `main` must always build. Every pull request from this repo uploads a preview version of the same Worker (`.github/workflows/preview.yml`, `wrangler versions upload --preview-alias pr-<n>`) at `https://pr-<n>-fieldwise.<account>.workers.dev` and comments the URL on the PR; it never takes production traffic.
 
 ## Stack
 
@@ -40,10 +40,11 @@ Next.js 15 App Router, React 19, TypeScript, Tailwind 3, react-leaflet 5, SheetJ
 
 ## Team docs
 
-`CROP_DATABASE_SPEC.md` (crop columns and Egypt research values), `DATA_REQUESTS.md` (values the team must supply, e.g. water budgets), `RESEARCH_PLAN.md`, `CLAUDE_DESIGN_PROMPT.md`.
+`CROP_DATABASE_SPEC.md` (crop columns and Egypt research values; `crops_database.xlsx` is the editable source, `npm run crops:import` rewrites `data/crops.json`), `DATA_REQUESTS.md` (values the team must supply, e.g. water budgets), `RESEARCH_PLAN.md`, `CLAUDE_DESIGN_PROMPT.md`.
 
 ## Known open issues
 
 - Water dimension scores 0 for all options: `WATER_BUDGET_MM` in `src/lib/engine/dimensions.ts` (medium 1300 mm) is below gross irrigation need (~1,900 mm). Waiting on the team (DATA_REQUESTS item #4).
-- Economic values in `data/crops.json` are placeholders.
+- Economic values in `data/crops.json` are placeholders for berseem, potato, onion, sorghum and rice; the other 6 crops use the team's workbook values.
+- Pest dimension scores 0 for options A, B and C with the team's pathogen sheet (break years 2–3, broad Fusarium hosts, cereal `family_break_years` 1): penalties add up uncapped. Needs a team review of break years/severity or a per-pathogen cap in `pest()`.
 - Fetch caching doesn't persist on Cloudflare yet (no incremental cache configured).

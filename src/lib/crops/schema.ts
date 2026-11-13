@@ -1,4 +1,4 @@
-import type { Crop, CropDataset, Pathogen, Texture } from '../types';
+import type { Crop, CropDataset, Disease, Pathogen, Texture } from '../types';
 import { TEXTURES } from '../types';
 
 /** Flat row layout used by crops_database.xlsx (one row per crop). */
@@ -10,9 +10,12 @@ export const CROP_COLUMNS = [
   'bnf_total_low', 'bnf_total_high', 'bnf_net_low', 'bnf_net_high', 'bnf_uncertainty',
   'root', 'tuber_or_bulb', 'family_break_years',
   'yield_t_ha', 'price_usd_t', 'cost_usd_ha', 'price_cv', 'capital', 'sources',
+  'root_depth_m', 'depletion_p', 'frost_kill_c', 'gaez_crop_code',
 ] as const;
 
 export const PATHOGEN_COLUMNS = ['id', 'name_en', 'name_ar', 'hosts', 'break_years', 'severity', 'control'] as const;
+
+export const DISEASE_COLUMNS = ['crop_id', 'name_en', 'name_ar', 'agent', 'conditions_en', 'conditions_ar'] as const;
 
 type Row = Record<string, unknown>;
 
@@ -70,6 +73,14 @@ export function rowToCrop(row: Row): Crop {
     },
     sources: String(row.sources ?? '').split(';').map((s) => s.trim()).filter(Boolean),
   };
+  const rootDepthM = num(row, 'root_depth_m', { optional: true, min: 0.1, max: 5 });
+  const depletionP = num(row, 'depletion_p', { optional: true, min: 0, max: 1 });
+  const frostKillC = num(row, 'frost_kill_c', { optional: true, min: -30, max: 15 });
+  const gaezCode = String(row.gaez_crop_code ?? '').trim();
+  if (Number.isFinite(rootDepthM)) crop.rootDepthM = rootDepthM;
+  if (Number.isFinite(depletionP)) crop.depletionP = depletionP;
+  if (Number.isFinite(frostKillC)) crop.frostKillC = frostKillC;
+  if (gaezCode) crop.gaezCode = gaezCode;
   const { tBase, tOptMin, tOptMax, tMax } = crop;
   if (!(tBase < tOptMin && tOptMin <= tOptMax && tOptMax < tMax)) throw new DatasetError(`${crop.id}: cardinal temperatures must satisfy base < optMin ≤ optMax < max`);
   const p = crop.ph;
@@ -91,6 +102,7 @@ export function cropToRow(c: Crop): Row {
     root: c.root, tuber_or_bulb: c.tuberOrBulb, family_break_years: c.familyBreakYears,
     yield_t_ha: c.econ.yieldT, price_usd_t: c.econ.priceUsdT, cost_usd_ha: c.econ.costUsd, price_cv: c.econ.priceCv, capital: c.econ.capital,
     sources: c.sources.join('; '),
+    root_depth_m: c.rootDepthM ?? '', depletion_p: c.depletionP ?? '', frost_kill_c: c.frostKillC ?? '', gaez_crop_code: c.gaezCode ?? '',
   };
 }
 
@@ -110,7 +122,21 @@ export const pathogenToRow = (p: Pathogen): Row => ({
   break_years: p.breakYears, severity: p.severity, control: p.control,
 });
 
-/** Validates cross-references (pathogen hosts must exist, ids unique). */
+export function rowToDisease(row: Row): Disease {
+  const ref = { ...row, id: row.crop_id };
+  return {
+    cropId: str(ref, 'crop_id'),
+    name: { en: str(ref, 'name_en'), ar: str(ref, 'name_ar') },
+    agent: str(ref, 'agent'),
+    conditions: { en: str(ref, 'conditions_en'), ar: str(ref, 'conditions_ar') },
+  };
+}
+
+export const diseaseToRow = (d: Disease): Row => ({
+  crop_id: d.cropId, name_en: d.name.en, name_ar: d.name.ar, agent: d.agent, conditions_en: d.conditions.en, conditions_ar: d.conditions.ar,
+});
+
+/** Validates cross-references (pathogen hosts and disease crops must exist, ids unique). */
 export function validateDataset(ds: CropDataset): CropDataset {
   const ids = new Set<string>();
   for (const c of ds.crops) {
@@ -119,5 +145,7 @@ export function validateDataset(ds: CropDataset): CropDataset {
   }
   for (const p of ds.pathogens)
     for (const h of p.hosts) if (!ids.has(h)) throw new DatasetError(`Pathogen "${p.id}" lists unknown host "${h}"`);
+  for (const d of ds.diseases ?? [])
+    if (!ids.has(d.cropId)) throw new DatasetError(`Disease "${d.name.en}" lists unknown crop "${d.cropId}"`);
   return ds;
 }
