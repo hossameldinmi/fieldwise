@@ -1,0 +1,149 @@
+{
+  "version": "2026.11-draft",
+  "notes": "Agronomic parameters compiled from FAO-56 (Allen et al. 1998), FAO-29 / Maas & Hoffman (1977) salinity tolerance, FAO Ecocrop, and legume BNF syntheses (Herridge et al. 2008; Peoples et al. 2009). Sowing windows reflect Egyptian practice. Thermal cardinals are for MONTHLY MEAN air temperature, not daily extremes. ECONOMIC VALUES ARE ILLUSTRATIVE PLACEHOLDERS (USD) and must be replaced with current local market data before use.",
+  "crops": [
+    {
+      "id": "wheat", "name": { "en": "Wheat", "ar": "قمح" }, "family": "Poaceae", "season": "winter",
+      "sowDoy": 319, "sowWindow": [305, 349], "durationDays": 160, "prepWeeks": 2,
+      "tBase": 0, "tOptMin": 14, "tOptMax": 22, "tMax": 30, "gddReq": 1800,
+      "waterRefMm": 450, "kc": { "ini": 0.4, "mid": 1.15, "end": 0.3 },
+      "texture": { "sand": 40, "loamy_sand": 60, "sandy_loam": 80, "loam": 100, "clay_loam": 100, "clay": 90 },
+      "ph": { "min": 5.5, "optMin": 6.0, "optMax": 7.5, "max": 8.5 },
+      "salinity": { "threshold": 6.0, "slope": 7.1 },
+      "bnf": null, "root": "fibrous", "tuberOrBulb": false, "familyBreakYears": 0,
+      "econ": { "yieldT": 6.5, "priceUsdT": 300, "costUsd": 900, "priceCv": 0.08, "capital": "low" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977"]
+    },
+    {
+      "id": "barley", "name": { "en": "Barley", "ar": "شعير" }, "family": "Poaceae", "season": "winter",
+      "sowDoy": 319, "sowWindow": [305, 349], "durationDays": 145, "prepWeeks": 2,
+      "tBase": 0, "tOptMin": 12, "tOptMax": 20, "tMax": 30, "gddReq": 1500,
+      "waterRefMm": 380, "kc": { "ini": 0.3, "mid": 1.15, "end": 0.25 },
+      "texture": { "sand": 55, "loamy_sand": 70, "sandy_loam": 90, "loam": 100, "clay_loam": 95, "clay": 85 },
+      "ph": { "min": 6.0, "optMin": 6.5, "optMax": 8.0, "max": 8.8 },
+      "salinity": { "threshold": 8.0, "slope": 5.0 },
+      "bnf": null, "root": "fibrous", "tuberOrBulb": false, "familyBreakYears": 0,
+      "econ": { "yieldT": 4.5, "priceUsdT": 260, "costUsd": 600, "priceCv": 0.12, "capital": "low" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977"]
+    },
+    {
+      "id": "berseem", "name": { "en": "Egyptian clover (berseem)", "ar": "برسيم" }, "family": "Fabaceae", "season": "winter",
+      "sowDoy": 288, "sowWindow": [274, 319], "durationDays": 190, "prepWeeks": 2,
+      "tBase": 4, "tOptMin": 15, "tOptMax": 22, "tMax": 30, "gddReq": 1400,
+      "waterRefMm": 650, "kc": { "ini": 0.4, "mid": 1.0, "end": 0.9 },
+      "texture": { "sand": 40, "loamy_sand": 55, "sandy_loam": 75, "loam": 95, "clay_loam": 100, "clay": 95 },
+      "ph": { "min": 6.0, "optMin": 6.5, "optMax": 7.8, "max": 8.5 },
+      "salinity": { "threshold": 1.5, "slope": 5.7 },
+      "bnf": { "totalFixed": { "low": 100, "high": 200 }, "netCredit": { "low": 40, "high": 80 }, "uncertainty": "medium" },
+      "root": "taproot", "tuberOrBulb": false, "familyBreakYears": 0,
+      "econ": { "yieldT": 70, "priceUsdT": 25, "costUsd": 700, "priceCv": 0.15, "capital": "low" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977", "Peoples et al. 2009"]
+    },
+    {
+      "id": "faba_bean", "name": { "en": "Faba bean", "ar": "فول بلدي" }, "family": "Fabaceae", "season": "winter",
+      "sowDoy": 305, "sowWindow": [290, 335], "durationDays": 150, "prepWeeks": 2,
+      "tBase": 2, "tOptMin": 14, "tOptMax": 20, "tMax": 28, "gddReq": 1500,
+      "waterRefMm": 420, "kc": { "ini": 0.5, "mid": 1.15, "end": 0.3 },
+      "texture": { "sand": 45, "loamy_sand": 60, "sandy_loam": 80, "loam": 100, "clay_loam": 100, "clay": 90 },
+      "ph": { "min": 6.0, "optMin": 6.5, "optMax": 8.0, "max": 8.5 },
+      "salinity": { "threshold": 1.6, "slope": 9.6 },
+      "bnf": { "totalFixed": { "low": 80, "high": 150 }, "netCredit": { "low": 25, "high": 45 }, "uncertainty": "medium" },
+      "root": "taproot", "tuberOrBulb": false, "familyBreakYears": 0,
+      "econ": { "yieldT": 3.2, "priceUsdT": 650, "costUsd": 800, "priceCv": 0.2, "capital": "low" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977", "Herridge et al. 2008"]
+    },
+    {
+      "id": "potato", "name": { "en": "Potato", "ar": "بطاطس" }, "family": "Solanaceae", "season": "winter",
+      "sowDoy": 288, "sowWindow": [274, 320], "durationDays": 115, "prepWeeks": 3,
+      "tBase": 7, "tOptMin": 15, "tOptMax": 20, "tMax": 29, "gddReq": 1000,
+      "waterRefMm": 500, "kc": { "ini": 0.5, "mid": 1.15, "end": 0.75 },
+      "texture": { "sand": 75, "loamy_sand": 95, "sandy_loam": 100, "loam": 90, "clay_loam": 60, "clay": 50 },
+      "ph": { "min": 5.0, "optMin": 5.5, "optMax": 6.5, "max": 8.0 },
+      "salinity": { "threshold": 1.7, "slope": 12 },
+      "bnf": null, "root": "tuber_bulb", "tuberOrBulb": true, "familyBreakYears": 3,
+      "econ": { "yieldT": 30, "priceUsdT": 230, "costUsd": 4500, "priceCv": 0.35, "capital": "high" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977"]
+    },
+    {
+      "id": "onion", "name": { "en": "Onion (export)", "ar": "بصل تصديري" }, "family": "Amaryllidaceae", "season": "winter",
+      "sowDoy": 335, "sowWindow": [320, 355], "durationDays": 165, "prepWeeks": 3,
+      "tBase": 6, "tOptMin": 13, "tOptMax": 24, "tMax": 30, "gddReq": 1500,
+      "waterRefMm": 550, "kc": { "ini": 0.7, "mid": 1.05, "end": 0.75 },
+      "texture": { "sand": 65, "loamy_sand": 85, "sandy_loam": 100, "loam": 95, "clay_loam": 70, "clay": 55 },
+      "ph": { "min": 5.8, "optMin": 6.0, "optMax": 7.5, "max": 8.2 },
+      "salinity": { "threshold": 1.2, "slope": 16 },
+      "bnf": null, "root": "tuber_bulb", "tuberOrBulb": true, "familyBreakYears": 2,
+      "econ": { "yieldT": 45, "priceUsdT": 150, "costUsd": 3500, "priceCv": 0.45, "capital": "high" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977"]
+    },
+    {
+      "id": "maize", "name": { "en": "Maize", "ar": "ذرة شامية" }, "family": "Poaceae", "season": "summer",
+      "sowDoy": 150, "sowWindow": [130, 185], "durationDays": 120, "prepWeeks": 2,
+      "tBase": 10, "tOptMin": 24, "tOptMax": 30, "tMax": 36, "gddReq": 1500,
+      "waterRefMm": 650, "kc": { "ini": 0.3, "mid": 1.2, "end": 0.35 },
+      "texture": { "sand": 45, "loamy_sand": 65, "sandy_loam": 85, "loam": 100, "clay_loam": 100, "clay": 90 },
+      "ph": { "min": 5.5, "optMin": 6.0, "optMax": 7.5, "max": 8.3 },
+      "salinity": { "threshold": 1.7, "slope": 12 },
+      "bnf": null, "root": "fibrous", "tuberOrBulb": false, "familyBreakYears": 0,
+      "econ": { "yieldT": 8, "priceUsdT": 260, "costUsd": 1000, "priceCv": 0.15, "capital": "medium" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977"]
+    },
+    {
+      "id": "sorghum", "name": { "en": "Sorghum", "ar": "ذرة رفيعة" }, "family": "Poaceae", "season": "summer",
+      "sowDoy": 160, "sowWindow": [140, 195], "durationDays": 110, "prepWeeks": 2,
+      "tBase": 10, "tOptMin": 26, "tOptMax": 32, "tMax": 40, "gddReq": 1400,
+      "waterRefMm": 500, "kc": { "ini": 0.3, "mid": 1.0, "end": 0.55 },
+      "texture": { "sand": 55, "loamy_sand": 75, "sandy_loam": 90, "loam": 100, "clay_loam": 100, "clay": 90 },
+      "ph": { "min": 5.5, "optMin": 6.0, "optMax": 8.0, "max": 8.5 },
+      "salinity": { "threshold": 6.8, "slope": 16 },
+      "bnf": null, "root": "fibrous", "tuberOrBulb": false, "familyBreakYears": 0,
+      "econ": { "yieldT": 5.5, "priceUsdT": 230, "costUsd": 650, "priceCv": 0.15, "capital": "low" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977"]
+    },
+    {
+      "id": "sunflower", "name": { "en": "Sunflower", "ar": "عباد الشمس" }, "family": "Asteraceae", "season": "summer",
+      "sowDoy": 140, "sowWindow": [125, 175], "durationDays": 105, "prepWeeks": 2,
+      "tBase": 6, "tOptMin": 20, "tOptMax": 28, "tMax": 35, "gddReq": 1500,
+      "waterRefMm": 500, "kc": { "ini": 0.35, "mid": 1.0, "end": 0.35 },
+      "texture": { "sand": 55, "loamy_sand": 75, "sandy_loam": 90, "loam": 100, "clay_loam": 95, "clay": 85 },
+      "ph": { "min": 6.0, "optMin": 6.5, "optMax": 7.8, "max": 8.5 },
+      "salinity": { "threshold": 4.8, "slope": 5.0 },
+      "bnf": null, "root": "taproot", "tuberOrBulb": false, "familyBreakYears": 0,
+      "econ": { "yieldT": 2.5, "priceUsdT": 550, "costUsd": 700, "priceCv": 0.18, "capital": "low" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977"]
+    },
+    {
+      "id": "soybean", "name": { "en": "Soybean", "ar": "فول الصويا" }, "family": "Fabaceae", "season": "summer",
+      "sowDoy": 150, "sowWindow": [135, 175], "durationDays": 120, "prepWeeks": 2,
+      "tBase": 10, "tOptMin": 22, "tOptMax": 30, "tMax": 36, "gddReq": 1400,
+      "waterRefMm": 550, "kc": { "ini": 0.4, "mid": 1.15, "end": 0.5 },
+      "texture": { "sand": 40, "loamy_sand": 60, "sandy_loam": 80, "loam": 100, "clay_loam": 100, "clay": 85 },
+      "ph": { "min": 5.8, "optMin": 6.2, "optMax": 7.5, "max": 8.2 },
+      "salinity": { "threshold": 5.0, "slope": 20 },
+      "bnf": { "totalFixed": { "low": 60, "high": 170 }, "netCredit": { "low": 0, "high": 20 }, "uncertainty": "high" },
+      "root": "taproot", "tuberOrBulb": false, "familyBreakYears": 0,
+      "econ": { "yieldT": 3.0, "priceUsdT": 520, "costUsd": 850, "priceCv": 0.18, "capital": "medium" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977", "Herridge et al. 2008"]
+    },
+    {
+      "id": "rice", "name": { "en": "Rice", "ar": "أرز" }, "family": "Poaceae", "season": "summer",
+      "sowDoy": 140, "sowWindow": [125, 165], "durationDays": 125, "prepWeeks": 3,
+      "tBase": 10, "tOptMin": 24, "tOptMax": 32, "tMax": 38, "gddReq": 1700,
+      "waterRefMm": 1300, "kc": { "ini": 1.05, "mid": 1.2, "end": 0.9 },
+      "texture": { "sand": 5, "loamy_sand": 10, "sandy_loam": 30, "loam": 70, "clay_loam": 95, "clay": 100 },
+      "ph": { "min": 5.0, "optMin": 5.5, "optMax": 7.5, "max": 8.5 },
+      "salinity": { "threshold": 3.0, "slope": 12 },
+      "bnf": null, "root": "fibrous", "tuberOrBulb": false, "familyBreakYears": 0,
+      "econ": { "yieldT": 9.5, "priceUsdT": 330, "costUsd": 1200, "priceCv": 0.15, "capital": "medium" },
+      "sources": ["FAO-56 Table 12", "Maas & Hoffman 1977", "Rice area is regulated by decree in Egypt"]
+    }
+  ],
+  "pathogens": [
+    { "id": "take_all", "name": { "en": "Take-all (Gaeumannomyces tritici)", "ar": "مرض الإصابة الكاملة (Take-all)" }, "hosts": ["wheat", "barley"], "breakYears": 1, "severity": 0.8, "control": "rotation_effective" },
+    { "id": "ccn", "name": { "en": "Cereal cyst nematode (Heterodera avenae)", "ar": "نيماتودا الحوصلات في الحبوب" }, "hosts": ["wheat", "barley"], "breakYears": 1, "severity": 0.6, "control": "rotation_effective" },
+    { "id": "pcn", "name": { "en": "Potato cyst nematode (Globodera spp.)", "ar": "نيماتودا الحوصلات في البطاطس" }, "hosts": ["potato"], "breakYears": 3, "severity": 0.9, "control": "rotation_partial" },
+    { "id": "verticillium", "name": { "en": "Verticillium wilt (V. dahliae)", "ar": "الذبول الفرتسيليومي" }, "hosts": ["potato", "sunflower"], "breakYears": 3, "severity": 0.6, "control": "rotation_partial" },
+    { "id": "orobanche", "name": { "en": "Crenate broomrape (Orobanche crenata)", "ar": "الهالوك" }, "hosts": ["faba_bean"], "breakYears": 3, "severity": 0.7, "control": "rotation_partial" },
+    { "id": "white_rot", "name": { "en": "Onion white rot (Stromatinia cepivora)", "ar": "العفن الأبيض في البصل" }, "hosts": ["onion"], "breakYears": 3, "severity": 0.5, "control": "rotation_partial" }
+  ]
+}
