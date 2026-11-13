@@ -3,32 +3,36 @@ import type { ClimateProfile, CropDataset, FarmInput, Lang, Level } from '@/lib/
 import type { Report } from '@/lib/engine/evaluate';
 import { buildSchedule } from '@/lib/engine/calendar';
 import { IRRIGATION_EFFICIENCY, seasonStats, thermal } from '@/lib/engine/dimensions';
-import { MONTH_DAYS, monthlyPET } from '@/lib/nasa/climate';
+import { MONTH_DAYS, etMethod, monthlyPET } from '@/lib/nasa/climate';
 import { monthName, t } from '@/lib/i18n';
 import { governorateLabel } from '@/lib/geo/regions';
 import { ArrowIcon, Bar, GapsBox, PageHead } from './ui';
+import { NdviPanel, type NdviState } from './NdviPanel';
 
-const SATELLITES: { name: string; res: string; key: string }[] = [
-  { name: 'Sentinel-2', res: '10 m', key: 'sat1' },
-  { name: 'MODIS · VIIRS NDVI', res: '250–500 m', key: 'sat5' },
-  { name: 'Landsat', res: '30 m', key: 'sat6' },
-  { name: 'GPM IMERG', res: '0.1°', key: 'sat2' },
-  { name: 'SRTM', res: '30 m', key: 'sat3' },
-  { name: 'SMAP', res: '9 km', key: 'sat4' },
-  { name: 'ECOSTRESS', res: '70 m', key: 'sat7' },
-  { name: 'GLDAS', res: '0.25°', key: 'sat8' },
-  { name: 'GRACE-FO', res: '~300 km', key: 'sat9' },
-  { name: 'FAO GAEZ', res: '~9 km', key: 'sat10' },
-  { name: 'ERA5', res: '0.25°', key: 'sat11' },
+type SourceStatus = 'live' | 'earthdata' | 'copernicus' | 'planned';
+const STATUS_KEY: Record<SourceStatus, string> = { live: 'srcLive', earthdata: 'srcEarthdata', copernicus: 'srcCopernicus', planned: 'srcPlanned' };
+/** Data sources from the Space Apps resource list and whether this build reads them. */
+const SATELLITES: { name: string; res: string; key: string; status: SourceStatus }[] = [
+  { name: 'MODIS NDVI (MOD13Q1)', res: '250 m', key: 'sat5', status: 'live' },
+  { name: 'GPM IMERG', res: '0.1°', key: 'sat2', status: 'earthdata' },
+  { name: 'SMAP', res: '9 km', key: 'sat4', status: 'earthdata' },
+  { name: 'SRTM', res: '30 m', key: 'sat3', status: 'earthdata' },
+  { name: 'ECOSTRESS', res: '70 m', key: 'sat7', status: 'earthdata' },
+  { name: 'GLDAS', res: '0.25°', key: 'sat8', status: 'earthdata' },
+  { name: 'GRACE-FO', res: '~300 km', key: 'sat9', status: 'earthdata' },
+  { name: 'Landsat', res: '30 m', key: 'sat6', status: 'earthdata' },
+  { name: 'Sentinel-2', res: '10 m', key: 'sat1', status: 'copernicus' },
+  { name: 'ERA5', res: '0.25°', key: 'sat11', status: 'copernicus' },
+  { name: 'FAO GAEZ', res: '~9 km', key: 'sat10', status: 'planned' },
 ];
 const WS_KEY: Record<Level, string> = { low: 'wsLow', medium: 'wsMedium', high: 'wsHigh' };
 
 const avg = (a: number[]) => a.reduce((x, y) => x + y, 0) / a.length;
 const shortMonth = (lang: Lang, i: number) => (lang === 'ar' ? monthName(lang, i) : monthName(lang, i).slice(0, 1));
 
-interface Props { lang: Lang; climate: ClimateProfile; report: Report; farm: FarmInput; dataset: CropDataset; stale: boolean; onBack: () => void; onNext: () => void }
+interface Props { lang: Lang; climate: ClimateProfile; report: Report; farm: FarmInput; dataset: CropDataset; ndvi: NdviState | null; stale: boolean; onBack: () => void; onNext: () => void }
 
-export function StepClimate({ lang, climate, report, farm, dataset, stale, onBack, onNext }: Props) {
+export function StepClimate({ lang, climate, report, farm, dataset, ndvi, stale, onBack, onNext }: Props) {
   const m = climate.months;
   const pet = monthlyPET(climate).map((v, i) => v * MONTH_DAYS[i]);
   const rain = m.map((x, i) => x.precMmDay * MONTH_DAYS[i]);
@@ -37,6 +41,9 @@ export function StepClimate({ lang, climate, report, farm, dataset, stale, onBac
   const axisMax = Math.max(50, Math.ceil(Math.max(...pet, ...rain) / 50) * 50);
   const H = 220, WH = 180, TMAX = 45;
   const eff = Math.round(IRRIGATION_EFFICIENCY[farm.irrigation] * 100);
+  const pm = etMethod(climate) === 'penman_monteith';
+  const soil = m.every((x) => x.gwetRoot !== undefined) ? avg(m.map((x) => x.gwetRoot!)) : null;
+  const frost = m.every((x) => x.frostDays !== undefined) ? m.reduce((a, x) => a + x.frostDays!, 0) : null;
 
   const ctx = { farm, climate, pathogens: dataset.pathogens, pet: monthlyPET(climate) };
   const crops = new Map(dataset.crops.map((c) => [c.id, c]));
@@ -60,9 +67,11 @@ export function StepClimate({ lang, climate, report, farm, dataset, stale, onBac
       <div className="mt-5 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
         <Kpi label={t(lang, 'kT')} value={`${avg(t2m).toFixed(1)} °C`} sub={`${Math.min(...t2m).toFixed(1)} → ${Math.max(...t2m).toFixed(1)} °C`} ltrSub />
         <Kpi label={t(lang, 'kP')} value={`${Math.round(annP)} mm`} sub={t(lang, annP < 150 ? 'kPsub' : 'kPsubWet')} />
-        <Kpi label={t(lang, 'kPET')} value={`${Math.round(report.climate.petMm).toLocaleString('en-US')} mm`} sub={t(lang, 'kPETsub')} />
+        <Kpi label={t(lang, pm ? 'kPETpm' : 'kPET')} value={`${Math.round(report.climate.petMm).toLocaleString('en-US')} mm`} sub={t(lang, pm ? 'kPETsubPm' : 'kPETsub')} />
         <Kpi label={t(lang, 'kRH')} value={`${Math.round(avg(m.map((x) => x.rh)))} %`} sub={t(lang, 'kRHsub')} />
         <Kpi label={t(lang, 'kSW')} value={(avg(m.map((x) => x.radMJ)) / 3.6).toFixed(1)} sub={t(lang, 'kSWsub')} />
+        {soil !== null && <Kpi label={t(lang, 'kSoil')} value={soil.toFixed(2)} sub={t(lang, 'kSoilSub')} />}
+        {frost !== null && <Kpi label={t(lang, 'kFrost')} value={frost.toFixed(1)} sub={t(lang, 'kFrostSub')} />}
       </div>
 
       <div className="mt-6 flex flex-wrap gap-6">
@@ -70,7 +79,7 @@ export function StepClimate({ lang, climate, report, farm, dataset, stale, onBac
           <div className="flex flex-wrap justify-between gap-3">
             <h2 className="fw-h2">{t(lang, 'thermalTitle')}</h2>
             <div className="flex items-center gap-3.5 text-xs text-sub">
-              <span className="flex items-center gap-1.5"><span className="h-3.5 w-2.5 rounded-[3px] bg-[#9FC2AE]" />{t(lang, 'legRange')}</span>
+              <span className="flex items-center gap-1.5"><span className="h-3.5 w-2.5 rounded-[3px] bg-[#9FC2AE]" />{t(lang, 'legRangeMean')}</span>
               <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-ink" />{t(lang, 'legMean')}</span>
             </div>
           </div>
@@ -154,15 +163,18 @@ export function StepClimate({ lang, climate, report, farm, dataset, stale, onBac
         </div>
       </section>
 
+      <NdviPanel lang={lang} state={ndvi} />
+
       <section className="mt-6" aria-label={t(lang, 'satTitle')}>
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="fw-h2 text-lg">{t(lang, 'satTitle')}</h2><span className="text-[13px] text-muted">{t(lang, 'satSub')}</span>
         </div>
         <div className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
           {SATELLITES.map((s) => (
-            <div key={s.name} className="rounded-xl border border-dashed border-[#B9C4B5] bg-white px-[18px] py-4">
+            <div key={s.name} className={`rounded-xl border bg-white px-[18px] py-4 ${s.status === 'live' ? 'border-green-line' : 'border-dashed border-[#B9C4B5]'}`}>
               <div className="flex justify-between gap-2"><b className="text-[15px]">{s.name}</b><span className="font-mono text-xs text-muted" dir="ltr">{s.res}</span></div>
               <p className="mt-2 text-[13px] leading-relaxed text-sub">{t(lang, s.key)}</p>
+              <span className={`mt-3 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${s.status === 'live' ? 'bg-green-tint text-green-dark' : 'bg-paper text-muted'}`}>{t(lang, STATUS_KEY[s.status])}</span>
             </div>
           ))}
         </div>

@@ -12,6 +12,7 @@ import { StepClimate } from '@/components/StepClimate';
 import { StepRotations } from '@/components/StepRotations';
 import { StepReport } from '@/components/StepReport';
 import { StepDatabase } from '@/components/StepDatabase';
+import type { NdviState } from '@/components/NdviPanel';
 
 const INITIAL: FarmInput = {
   name: 'Sakha demonstration field', lat: 31.0964, lng: 30.9426, area: 12, areaUnit: 'feddan',
@@ -36,6 +37,7 @@ export default function Home() {
   const [dataset, setDataset] = useState<CropDataset>(DEFAULT_DATASET);
   const [climate, setClimate] = useState<ClimateProfile | null>(null);
   const [geo, setGeo] = useState<{ lat: number; lng: number; hit: GeocodeHit | null } | null>(null);
+  const [ndvi, setNdvi] = useState<{ lat: number; lng: number; state: NdviState } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,6 +72,7 @@ export default function Home() {
   async function analyze() {
     if (![farm.lat, farm.lng].every(Number.isFinite)) { setError(t(lang, 'errorCoords')); return; }
     setBusy(true); setError(null);
+    loadNdvi(farm.lat, farm.lng);
     try {
       const [powerRes, hit] = await Promise.all([
         fetch(`/api/power?lat=${farm.lat}&lng=${farm.lng}`),
@@ -87,6 +90,17 @@ export default function Home() {
     } finally { setBusy(false); }
   }
 
+  /** MODIS NDVI is supplementary: it loads in the background and never blocks scoring. */
+  function loadNdvi(lat: number, lng: number) {
+    if (ndvi && ndvi.lat === lat && ndvi.lng === lng && ndvi.state.status !== 'error') return;
+    setNdvi({ lat, lng, state: { status: 'loading' } });
+    fetch(`/api/ndvi?lat=${lat}&lng=${lng}`)
+      .then(async (r) => { const b = await r.json(); if (!r.ok) throw new Error(b.error ?? `HTTP ${r.status}`); return b; })
+      .then((data) => setNdvi((cur) => (cur && cur.lat === lat && cur.lng === lng ? { lat, lng, state: { status: 'ok', data } } : cur)))
+      .catch((e) => setNdvi((cur) => (cur && cur.lat === lat && cur.lng === lng ? { lat, lng, state: { status: 'error', message: e instanceof Error ? e.message : String(e) } } : cur)));
+  }
+  const ndviState = ndvi && ndvi.lat === farm.lat && ndvi.lng === farm.lng ? ndvi.state : null;
+
   return (
     <>
       <AppHeader lang={lang} step={step} canAnalyze={!!report} onStep={setStep} onLang={setLang} />
@@ -95,14 +109,14 @@ export default function Home() {
           verification={verification} busy={busy} error={error} onAnalyze={analyze} />
       )}
       {step === 2 && report && climate && (
-        <StepClimate lang={lang} climate={climate} report={report} farm={farm} dataset={dataset} stale={stale} onBack={() => setStep(1)} onNext={() => setStep(3)} />
+        <StepClimate lang={lang} climate={climate} report={report} farm={farm} dataset={dataset} ndvi={ndviState} stale={stale} onBack={() => setStep(1)} onNext={() => setStep(3)} />
       )}
       {step === 3 && report && (
         <StepRotations lang={lang} report={report} dataset={dataset} selected={selected ?? best} onSelect={setSelected}
           custom={custom} onCustom={setCustom} onBack={() => setStep(2)} onNext={() => setStep(4)} />
       )}
       {step === 4 && report && (
-        <StepReport lang={lang} report={report} dataset={dataset} farm={farm} onBack={() => setStep(3)} onRestart={() => setStep(1)} />
+        <StepReport lang={lang} report={report} dataset={dataset} farm={farm} ndvi={ndviState?.status === 'ok' ? ndviState.data : null} onBack={() => setStep(3)} onRestart={() => setStep(1)} />
       )}
       {step === 5 && <StepDatabase lang={lang} dataset={dataset} onLoad={setDataset} />}
     </>

@@ -39,11 +39,11 @@ export function cardinalFit(crop: Crop, t: number): number {
   return 0;
 }
 
-export interface SeasonStats { fit: number; gdd: number; tMinMonth: number; tMaxMonth: number; hotMonth: number | null; etcMm: number; peffMm: number }
+export interface SeasonStats { fit: number; gdd: number; tMinMonth: number; tMaxMonth: number; hotMonth: number | null; etcMm: number; peffMm: number; frostDays: number }
 
 export function seasonStats(p: Planting, ctx: EvalContext): SeasonStats {
   const { crop } = p;
-  let fit = 0, gdd = 0, etc = 0, peff = 0;
+  let fit = 0, gdd = 0, etc = 0, peff = 0, frost = 0;
   let tLo = Infinity, tHi = -Infinity, hot: number | null = null;
   for (let d = p.sow; d < p.harvest; d++) {
     const m = monthOfDoy(agDayToDoy(d));
@@ -52,13 +52,16 @@ export function seasonStats(p: Planting, ctx: EvalContext): SeasonStats {
     gdd += Math.max(0, Math.min(c.t2m, crop.tMax) - crop.tBase);
     etc += kcAt(crop, (d - p.sow) / crop.durationDays) * ctx.pet[m];
     peff += effectiveRain(c.precMmDay * MONTH_DAYS[m]) / MONTH_DAYS[m];
+    frost += (c.frostDays ?? 0) / MONTH_DAYS[m];
     tLo = Math.min(tLo, c.t2m); tHi = Math.max(tHi, c.t2m);
     if (c.t2m > crop.tMax && hot === null) hot = m;
   }
-  return { fit: fit / crop.durationDays, gdd, tMinMonth: tLo, tMaxMonth: tHi, hotMonth: hot, etcMm: etc, peffMm: peff };
+  return { fit: fit / crop.durationDays, gdd, tMinMonth: tLo, tMaxMonth: tHi, hotMonth: hot, etcMm: etc, peffMm: peff, frostDays: frost };
 }
 
 /* ---------- 1. Climatic & thermal ---------- */
+/** Expected frost days (POWER FROST_DAYS) within a season above which the report warns. */
+export const FROST_NOTE_DAYS = 1;
 export function thermal(ps: Planting[], stats: SeasonStats[]): DimensionResult {
   const notes: Note[] = [];
   let acc = 0, w = 0;
@@ -69,6 +72,7 @@ export function thermal(ps: Planting[], stats: SeasonStats[]): DimensionResult {
     acc += score * p.crop.durationDays; w += p.crop.durationDays;
     notes.push({ key: 'thermal.crop', params: { crop: p.crop.id, season: seasonLabel(p), tmin: r(s.tMinMonth, 1), tmax: r(s.tMaxMonth, 1), fit: r(s.fit), gdd: r(s.gdd), req: p.crop.gddReq }, level: score < 60 ? 'warn' : 'info', tier: 2 });
     if (s.hotMonth !== null) notes.push({ key: 'thermal.heat', params: { crop: p.crop.id, month: s.hotMonth, max: p.crop.tMax }, level: 'risk', tier: 2 });
+    if (s.frostDays >= FROST_NOTE_DAYS) notes.push({ key: 'thermal.frost', params: { crop: p.crop.id, season: seasonLabel(p), days: r(s.frostDays, 1) }, level: 'warn', tier: 1 });
   });
   return { id: 'thermal', score: acc / w, notes };
 }

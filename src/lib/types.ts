@@ -47,12 +47,26 @@ export interface Pathogen {
 
 export interface CropDataset { version: string; notes?: string; crops: Crop[]; pathogens: Pathogen[] }
 
-export interface MonthClimate { t2m: number; tmax: number; tmin: number; precMmDay: number; rh: number; radMJ: number }
+/**
+ * One month of climatology. `tmax`/`tmin` are MEAN daily max/min (t2m ± half the mean daily range),
+ * not the month's extremes, which are kept separately in `tmaxAbs`/`tminAbs`.
+ * Optional fields come from extra NASA POWER parameters and enable Penman-Monteith ET₀ and frost/soil-moisture notes.
+ */
+export interface MonthClimate {
+  t2m: number; tmax: number; tmin: number; precMmDay: number; rh: number; radMJ: number;
+  tmaxAbs?: number; tminAbs?: number;
+  ws2m?: number;      // wind speed at 2 m (m/s)
+  dewC?: number;      // dew/frost point at 2 m (°C)
+  gwetRoot?: number;  // root-zone soil wetness (0–1)
+  gwetTop?: number;   // surface soil wetness (0–1)
+  frostDays?: number; // days in the month with T2M_MIN < 0 °C
+}
 
 export interface ClimateProfile {
   lat: number; lng: number;
   months: MonthClimate[]; // Jan..Dec
   kind: 'climatology';
+  elevationM?: number; // grid-cell elevation reported by POWER (used for air pressure in ET₀)
   period: string;
   resolution: string;
   source: string;

@@ -9,13 +9,14 @@ import { monthName, renderNote, t } from '@/lib/i18n';
 import { governorateLabel } from '@/lib/geo/regions';
 import { familyColor, statusOf } from '@/lib/ui';
 import { GapsBox, PageHead, RuleItem, TierLegend } from './ui';
+import type { NdviProfile } from '@/lib/nasa/modis';
 
 const LEVEL_ORDER: Record<Note['level'], number> = { risk: 0, warn: 1, info: 2 };
 const MAX_FINDINGS = 8;
 
-interface Props { lang: Lang; report: Report; dataset: CropDataset; farm: FarmInput; onBack: () => void; onRestart: () => void }
+interface Props { lang: Lang; report: Report; dataset: CropDataset; farm: FarmInput; ndvi: NdviProfile | null; onBack: () => void; onRestart: () => void }
 
-export function StepReport({ lang, report, dataset, farm, onBack, onRestart }: Props) {
+export function StepReport({ lang, report, dataset, farm, ndvi, onBack, onRestart }: Props) {
   const ranked = [...report.results].sort((a, b) => b.total - a.total);
   const best = ranked[0];
   const date = (agDay: number) => { const { month, day } = doyToDate(agDayToDoy(agDay)); return `${day} ${monthName(lang, month)}`; };
@@ -99,6 +100,13 @@ export function StepReport({ lang, report, dataset, farm, onBack, onRestart }: P
         <section className="fw-card min-w-0 flex-[1_1_560px]" aria-label={t(lang, 'findings')}>
           <h2 className="fw-h2">{t(lang, 'findings')}</h2>
           <ul className="mt-3 flex flex-col gap-2">
+            {ndvi && (
+              <RuleItem lang={lang} status="synced" meta={`MODIS MOD13Q1 · ${t(lang, 'tierWord')} 1`}
+                text={t(lang, ndvi.bareMonths.length ? 'ndviFinding' : 'ndviFindingNone', {
+                  period: ndvi.period, cycles: ndvi.cyclesPerYear.toFixed(1),
+                  bare: ndvi.bareMonths.map((m) => monthName(lang, m)).join(lang === 'ar' ? '، ' : ', '),
+                })} />
+            )}
             {findings.map(({ n, dim }, i) => (
               <RuleItem key={i} lang={lang} status={statusOf(n.level)} text={renderNote(n, lang, dataset)} meta={`${t(lang, `rd_${dim}`)} · ${t(lang, 'tierWord')} ${n.tier}`} />
             ))}
