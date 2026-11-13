@@ -48,6 +48,10 @@ export const GOVERNORATES: Governorate[] = [
   { id: 'aswan', name: { en: 'Aswan', ar: 'أسوان' }, aliases: ['aswan', 'اسوان', 'أسوان'], bbox: [23.9, 25.4, 32.6, 33.1], zone: 'mixed', salinityRisk: false },
   { id: 'new_valley', name: { en: 'New Valley', ar: 'الوادي الجديد' }, aliases: ['al wadi al jadid', 'kharga', 'dakhla', 'الوادي الجديد'], bbox: [24.5, 26.5, 27.5, 31.0], zone: 'oasis', salinityRisk: true },
   { id: 'matrouh', name: { en: 'Matrouh', ar: 'مطروح' }, aliases: ['marsa matruh', 'matruh', 'مطروح'], bbox: [30.5, 31.7, 25.0, 29.4], zone: 'desert_reclaimed', salinityRisk: false },
+  // Sinai and Red Sea boxes start east of the canal / Nile-valley boxes; farming relies on brackish wells or El Salam canal water.
+  { id: 'north_sinai', name: { en: 'North Sinai', ar: 'شمال سيناء' }, aliases: ['shamal sina', 'north sinai', 'al arish', 'el arish', 'شمال سيناء'], bbox: [30.4, 31.35, 32.4, 34.25], zone: 'desert_reclaimed', salinityRisk: true },
+  { id: 'south_sinai', name: { en: 'South Sinai', ar: 'جنوب سيناء' }, aliases: ['janub sina', 'south sinai', 'el tor', 'جنوب سيناء'], bbox: [27.7, 30.0, 32.7, 34.9], zone: 'desert_reclaimed', salinityRisk: true },
+  { id: 'red_sea', name: { en: 'Red Sea', ar: 'البحر الأحمر' }, aliases: ['al bahr al ahmar', 'red sea', 'hurghada', 'البحر الاحمر', 'البحر الأحمر'], bbox: [22.0, 28.9, 33.0, 36.9], zone: 'desert_reclaimed', salinityRisk: true },
 ];
 
 const norm = (s: string) =>

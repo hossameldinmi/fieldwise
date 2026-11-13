@@ -6,6 +6,7 @@ import { STRATEGIES, farmStrategies } from '../src/lib/engine/strategies';
 import { cropSoilScore, hostGaps } from '../src/lib/engine/dimensions';
 import { soilAmendments } from '../src/lib/engine/amendments';
 import { verifyLocation } from '../src/lib/geo/verify';
+import { GOVERNORATES, findGovernorateByName, findGovernorateByPoint } from '../src/lib/geo/regions';
 import { convertArea, toHectares } from '../src/lib/units';
 import { deltaClimate, farm } from './fixtures';
 
@@ -86,6 +87,16 @@ describe('geo verification', () => {
     const v = verifyLocation(farm({ governorate: 'كفر الشيخ' }), { countryCode: 'eg', country: 'Egypt', state: 'Kafr El-Sheikh Governorate' });
     expect(v.method).toBe('reverse_geocode');
     expect(v.overridden).toBe(false);
+  });
+  it('covers all 27 governorates, including Sinai and the Red Sea', () => {
+    expect(GOVERNORATES).toHaveLength(27);
+    expect(findGovernorateByPoint(31.13, 33.8)?.id).toBe('north_sinai'); // El Arish
+    expect(findGovernorateByPoint(28.24, 33.62)?.id).toBe('south_sinai'); // El Tor
+    expect(findGovernorateByPoint(27.26, 33.81)?.id).toBe('red_sea'); // Hurghada
+    expect(findGovernorateByPoint(31.26, 32.3)?.id).toBe('port_said');
+    expect(findGovernorateByPoint(29.97, 32.55)?.id).toBe('suez');
+    expect(findGovernorateByName('محافظة البحر الأحمر')?.id).toBe('red_sea');
+    expect(findGovernorateByName('South Sinai Governorate')?.id).toBe('south_sinai');
   });
 });
 
