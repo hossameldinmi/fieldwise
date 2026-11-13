@@ -34,6 +34,14 @@ export interface Crop {
   familyBreakYears: number;
   econ: { yieldT: number; priceUsdT: number; costUsd: number; priceCv: number; capital: Level };
   sources: string[];
+  /** FAO-56 Table 22 max effective rooting depth (m). Not scored yet (planned: SMAP root-zone moisture). */
+  rootDepthM?: number;
+  /** FAO-56 Table 22 depletion fraction p before water stress (0–1). Not scored yet. */
+  depletionP?: number;
+  /** Daily minimum air temperature (°C) that kills the crop at its most sensitive stage. Not scored yet. */
+  frostKillC?: number;
+  /** FAO GAEZ v4 crop code, for a planned suitability cross-check. */
+  gaezCode?: string;
 }
 
 export interface Pathogen {
@@ -45,7 +53,18 @@ export interface Pathogen {
   control: 'rotation_effective' | 'rotation_partial';
 }
 
-export interface CropDataset { version: string; notes?: string; crops: Crop[]; pathogens: Pathogen[] }
+/**
+ * A disease of one crop and the conditions that favour it. Reference information only: most of these
+ * are airborne or seed-borne, so rotation does not control them and they are not scored.
+ */
+export interface Disease {
+  cropId: string;
+  name: { en: string; ar: string };
+  agent: string;
+  conditions: { en: string; ar: string };
+}
+
+export interface CropDataset { version: string; notes?: string; crops: Crop[]; pathogens: Pathogen[]; diseases?: Disease[] }
 
 /**
  * One month of climatology. `tmax`/`tmin` are MEAN daily max/min (t2m ± half the mean daily range),

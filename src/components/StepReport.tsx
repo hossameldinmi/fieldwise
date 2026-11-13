@@ -32,6 +32,9 @@ export function StepReport({ lang, report, dataset, farm, ndvi, onBack, onRestar
     ? (legumes.reduce((a, p) => a + (p.crop.bnf!.netCredit.low + p.crop.bnf!.netCredit.high) / 2, 0) / legumes.length) * report.hectares
     : 0;
   const families = new Set(best.plantings.map((p) => p.crop.family)).size;
+  const watch = [...new Map(best.plantings.map((p) => [p.crop.id, p.crop])).values()]
+    .map((crop) => ({ crop, names: [...new Set((dataset.diseases ?? []).filter((d) => d.cropId === crop.id).map((d) => d.name[lang]))] }))
+    .filter((w) => w.names.length > 0);
   const findings = best.dims
     .flatMap((d) => d.notes.map((n) => ({ n, dim: d.id })))
     .sort((a, b) => LEVEL_ORDER[a.n.level] - LEVEL_ORDER[b.n.level])
@@ -87,6 +90,17 @@ export function StepReport({ lang, report, dataset, farm, ndvi, onBack, onRestar
               {report.amendments.map((n, i) => <li key={i}>{renderNote(n, lang, dataset)}</li>)}
             </ol>
           </section>
+          {watch.length > 0 && (
+            <section className="fw-card" aria-label={t(lang, 'watchTitle')}>
+              <h2 className="fw-h2">{t(lang, 'watchTitle')}</h2>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted">{t(lang, 'watchLead')} · {t(lang, 'tierWord')} 3</p>
+              <ul className="mt-2.5 flex flex-col gap-1.5 text-sm leading-relaxed">
+                {watch.map(({ crop, names }) => (
+                  <li key={crop.id}><b>{crop.name[lang]}:</b> {names.join(lang === 'ar' ? '، ' : ', ')}</li>
+                ))}
+              </ul>
+            </section>
+          )}
           <section className="fw-card border-plum-line bg-plum-tint" aria-label={t(lang, 'labs')}>
             <h2 className="fw-h2 text-plum">{t(lang, 'labs')}</h2>
             <ul className="mt-2.5 flex list-disc flex-col gap-1.5 ps-5 text-sm leading-relaxed text-plum-ink">

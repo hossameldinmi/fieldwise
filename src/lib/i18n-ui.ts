@@ -86,6 +86,13 @@ export const UI_EN: Dict = {
   s5lead: 'Crop definitions live in data, not code. Load an edited crops_database.xlsx to re-score every option instantly.',
   cCrop: 'Crop', cFam: 'Family', cSeason: 'Season', cDays: 'Days', cTopt: 'T opt °C', cWater: 'Water mm', cPh: 'pH', cEce: 'ECe thr.', cBnf: 'Net N credit', cRoot: 'Roots',
   fibrous: 'Fibrous', taproot: 'Taproot', tuber_bulb: 'Tuber / bulb',
+  cRootDepth: 'Root depth m', cDepletion: 'Depletion p', cFrost: 'Frost kill °C',
+  newColsNote: 'Root depth, depletion fraction and frost-kill temperature are stored for planned SMAP and frost checks; they do not affect scores yet.',
+  diseasesTitle: 'Diseases and the conditions that favour them',
+  diseasesLead: 'Reference only, not scored. Most of these spread by air or seed, so rotation does not control them. Soil-borne pathogens that rotation does control are scored under Pest & pathogen break.',
+  diseaseCol: 'Disease', agentCol: 'Causal agent', conditionsCol: 'Favourable conditions',
+  diseaseCount: '{n} diseases', noDiseases: 'No disease data for this crop yet.',
+  watchTitle: 'Diseases to watch', watchLead: 'Diseases of the crops in this rotation. Conditions for each are in the Crop database step.',
 };
 
 export const UI_AR: Dict = {
@@ -173,4 +180,11 @@ export const UI_AR: Dict = {
   s5lead: 'تعريفات المحاصيل في ملف بيانات وليست داخل الكود. حمّل ملف crops_database.xlsx بعد تعديله لإعادة تقييم كل الخيارات فورًا.',
   cCrop: 'المحصول', cFam: 'العائلة', cSeason: 'العروة', cDays: 'الأيام', cTopt: 'الحرارة المثلى °م', cWater: 'المياه مم', cPh: 'الحموضة', cEce: 'حد الملوحة', cBnf: 'الرصيد الأزوتي', cRoot: 'الجذور',
   fibrous: 'ليفية', taproot: 'وتدية', tuber_bulb: 'درنية / بصلية',
+  cRootDepth: 'عمق الجذور م', cDepletion: 'معامل الاستنزاف p', cFrost: 'حد الصقيع القاتل °م',
+  newColsNote: 'عمق الجذور ومعامل الاستنزاف وحد الصقيع القاتل محفوظة لفحوص SMAP والصقيع المخطط لها، ولا تؤثر في التقييم حاليًا.',
+  diseasesTitle: 'الأمراض والظروف الملائمة لها',
+  diseasesLead: 'للمرجعية فقط ولا تدخل في التقييم. معظمها ينتشر بالهواء أو البذور، فلا تتحكم فيه الدورة الزراعية. أما الممرضات الأرضية التي تتحكم فيها الدورة فتُقيَّم في بُعد كسر دورة الآفات والأمراض.',
+  diseaseCol: 'المرض', agentCol: 'المسبب العلمي', conditionsCol: 'الظروف الملائمة',
+  diseaseCount: '{n} أمراض', noDiseases: 'لا توجد بيانات أمراض لهذا المحصول بعد.',
+  watchTitle: 'أمراض تجب مراقبتها', watchLead: 'أمراض محاصيل هذه الدورة. الظروف الملائمة لكل مرض في مرحلة قاعدة بيانات المحاصيل.',
 };

@@ -1,8 +1,10 @@
 import * as XLSX from 'xlsx';
 import type { CropDataset } from '../types';
-import { CROP_COLUMNS, PATHOGEN_COLUMNS, cropToRow, pathogenToRow, rowToCrop, rowToPathogen, validateDataset } from './schema';
+import {
+  CROP_COLUMNS, DISEASE_COLUMNS, PATHOGEN_COLUMNS, cropToRow, diseaseToRow, pathogenToRow, rowToCrop, rowToDisease, rowToPathogen, validateDataset,
+} from './schema';
 
-/** Parses crops_database.xlsx (sheets "crops" and "pathogens"). Works in browser and Node. */
+/** Parses crops_database.xlsx (sheets "crops" and "pathogens", optional "diseases"). Works in browser and Node. */
 export function parseCropWorkbook(data: ArrayBuffer, version = 'uploaded'): CropDataset {
   const wb = XLSX.read(data, { type: 'array' });
   const cropSheet = wb.Sheets['crops'];
@@ -10,13 +12,16 @@ export function parseCropWorkbook(data: ArrayBuffer, version = 'uploaded'): Crop
   if (!cropSheet || !pathSheet) throw new Error('Workbook must contain sheets named "crops" and "pathogens"');
   const crops = XLSX.utils.sheet_to_json<Record<string, unknown>>(cropSheet, { defval: '' }).map(rowToCrop);
   const pathogens = XLSX.utils.sheet_to_json<Record<string, unknown>>(pathSheet, { defval: '' }).map(rowToPathogen);
-  return validateDataset({ version, crops, pathogens });
+  const diseaseSheet = wb.Sheets['diseases'];
+  const diseases = diseaseSheet ? XLSX.utils.sheet_to_json<Record<string, unknown>>(diseaseSheet, { defval: '' }).map(rowToDisease) : [];
+  return validateDataset({ version, crops, pathogens, diseases });
 }
 
 export function buildCropWorkbook(ds: CropDataset): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ds.crops.map(cropToRow), { header: [...CROP_COLUMNS] }), 'crops');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(ds.pathogens.map(pathogenToRow), { header: [...PATHOGEN_COLUMNS] }), 'pathogens');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet((ds.diseases ?? []).map(diseaseToRow), { header: [...DISEASE_COLUMNS] }), 'diseases');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['version', ds.version], ['notes', ds.notes ?? '']]), 'about');
   return wb;
 }
